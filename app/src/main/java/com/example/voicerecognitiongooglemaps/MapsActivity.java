@@ -6,13 +6,16 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -35,6 +38,7 @@ import com.google.android.gms.tasks.Task;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -105,11 +109,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String[] permission = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
             locationPermission = true;
-            loadMap();
         }
         else {
             ActivityCompat.requestPermissions(this, permission, LOCATION_REQUEST_CODE);
         }
+        loadMap();
     }
 
     @Override
@@ -159,6 +163,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (name !="Me") {
             MarkerOptions options = new MarkerOptions().position(latLng).title(name);
             mMap.addMarker(options);
+        }
+    }
+
+    public void getSpeech(View view) {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, 10);
+        } else {
+            Toast.makeText(this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case 10:
+                if (resultCode == RESULT_OK && data != null) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    searchField.setText(result.get(0));
+                }
+                break;
         }
     }
 }

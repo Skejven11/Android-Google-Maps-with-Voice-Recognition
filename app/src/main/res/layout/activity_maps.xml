@@ -21,11 +21,23 @@
     android:background="@color/white"
     android:id="@+id/relLayout1">
 
+
+        <ImageView
+            android:id="@+id/ic_btnMicro"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:onClick="getSpeech"
+            android:src="@drawable/ic_micro" />
+
         <EditText
         android:layout_marginLeft="5dp"
+        android:singleLine="true"
+        android:maxLines="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/ic_btnMicro"
         android:textSize="18sp"
         android:textColor="#000"
         android:id="@+id/input_search"
