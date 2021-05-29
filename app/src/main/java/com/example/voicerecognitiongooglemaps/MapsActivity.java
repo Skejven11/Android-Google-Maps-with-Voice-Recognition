@@ -28,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -48,8 +49,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String TAG = "MapActivity";
     private FusedLocationProviderClient userLocation;
     private EditText searchField;
+    private Marker markerName;
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -80,15 +83,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Geocoder geocoder = new Geocoder(this);
         List<Address> list = new ArrayList<>();
-        try{
+        try {
             list = geocoder.getFromLocationName(search, 1);
-        }catch (IOException e){
-            Log.e(TAG, e.getMessage() );
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
         }
 
-        if(list.size() > 0){
+        if (list.size() > 0) {
             Address address = list.get(0);
-            moveToPoint(new LatLng(address.getLatitude(),address.getLongitude()),12f, address.getAddressLine(0));
+            moveToPoint(new LatLng(address.getLatitude(), address.getLongitude()), 12f, address.getAddressLine(0));
         }
     }
 
@@ -105,12 +108,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(this, "Location loaded", Toast.LENGTH_SHORT).show();
     }
 
-    private void getPermission(){
+    private void getPermission() {
         String[] permission = {Manifest.permission.ACCESS_FINE_LOCATION};
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationPermission = true;
-        }
-        else {
+        } else {
             ActivityCompat.requestPermissions(this, permission, LOCATION_REQUEST_CODE);
         }
         loadMap();
@@ -119,14 +121,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermission = false;
-        switch(requestCode){
-            case LOCATION_REQUEST_CODE:{
-                if(grantResults.length != 0){
-                    for(int i = 0; i < grantResults.length; i++){
+        switch (requestCode) {
+            case LOCATION_REQUEST_CODE: {
+                if (grantResults.length != 0) {
+                    for (int i = 0; i < grantResults.length; i++) {
                         Log.d(TAG, String.valueOf(grantResults[i]));
-                        if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             locationPermission = false;
-                            Toast.makeText(this,"Permission not granted", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
@@ -145,24 +147,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        moveToPoint(new LatLng(location.getLatitude(), location.getLongitude()),12f, "Me");
+                        moveToPoint(new LatLng(location.getLatitude(), location.getLongitude()), 12f, "Me");
+                    } else {
+                        Toast.makeText(MapsActivity.this, "Can't load user location, enable localisation feature in your device", Toast.LENGTH_SHORT).show();
                     }
-                    else {
-                        Toast.makeText(MapsActivity.this,"Can't load user location, enable localisation feature in your device", Toast.LENGTH_SHORT).show();
-                    }
-            }});
-            }
-        catch (SecurityException e){
-            Log.e(TAG, "Exception: " + e.getMessage() );
+                }
+            });
+        } catch (SecurityException e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
         }
     }
 
     private void moveToPoint(LatLng latLng, float zoom, String name) {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+        if (markerName!=null) markerName.remove();
 
-        if (name !="Me") {
+        if (name != "Me") {
             MarkerOptions options = new MarkerOptions().position(latLng).title(name);
-            mMap.addMarker(options);
+            markerName = mMap.addMarker(options);
         }
     }
 
@@ -172,9 +174,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, 10);
+            startActivityForResult(intent, 2);
         } else {
-            Toast.makeText(this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Speech recognition not supported in this device", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -182,13 +184,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case 10:
-                if (resultCode == RESULT_OK && data != null) {
-                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    searchField.setText(result.get(0));
-                }
-                break;
+        if (requestCode == 2 && data != null) {
+            ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            searchField.setText(result.get(0));
         }
     }
 }
