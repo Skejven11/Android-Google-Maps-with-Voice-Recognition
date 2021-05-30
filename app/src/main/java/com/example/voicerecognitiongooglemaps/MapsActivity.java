@@ -93,6 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Address address = list.get(0);
             moveToPoint(new LatLng(address.getLatitude(), address.getLongitude()), 12f, address.getAddressLine(0));
         }
+        else {
+            Toast.makeText(this, "Can't find searched place", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -149,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (location != null) {
                         moveToPoint(new LatLng(location.getLatitude(), location.getLongitude()), 12f, "Me");
                     } else {
-                        Toast.makeText(MapsActivity.this, "Can't load user location, enable localisation feature in your device", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MapsActivity.this, "Can't load user location, enable localisation feature in your device", Toast.LENGTH_LONG).show();
                     }
                 }
             });
