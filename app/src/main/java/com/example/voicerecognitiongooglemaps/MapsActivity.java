@@ -91,7 +91,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (list.size() > 0) {
             Address address = list.get(0);
-            moveToPoint(new LatLng(address.getLatitude(), address.getLongitude()), 12f, address.getAddressLine(0));
+            moveToPoint(new LatLng(address.getLatitude(), address.getLongitude()),
+                    12f, address.getAddressLine(0));
         }
         else {
             Toast.makeText(this, "Can't find searched place", Toast.LENGTH_LONG).show();
@@ -113,7 +114,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void getPermission() {
         String[] permission = {Manifest.permission.ACCESS_FINE_LOCATION};
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
             locationPermission = true;
         } else {
             ActivityCompat.requestPermissions(this, permission, LOCATION_REQUEST_CODE);
@@ -144,7 +146,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void getLocation() {
         userLocation = LocationServices.getFusedLocationProviderClient(this);
-
         try {
             userLocation.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
@@ -152,7 +153,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (location != null) {
                         moveToPoint(new LatLng(location.getLatitude(), location.getLongitude()), 12f, "Me");
                     } else {
-                        Toast.makeText(MapsActivity.this, "Can't load user location, enable localisation feature in your device", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MapsActivity.this,
+                                "Can't load user location, enable localisation feature in your device", Toast.LENGTH_LONG).show();
                     }
                 }
             });
